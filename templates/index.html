@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Drug Consumption Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            padding: 15px;
+            background-image: url('https://p4.wallpaperbetter.com/wallpaper/470/585/210/luxury-royal-black-gold-wallpaper-preview.jpg');
+            background-size: cover;
+            background-position: center;
+            color: black;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            margin-top: 0;
+            color: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 50px;
+            animation: shake 1.5s infinite alternate;
+            text-shadow: -2px -2px 0 red, 2px -2px 0 red, -2px 2px 0 red, 2px 2px 0 red;
+        }
+
+        p {
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+        }
+
+        form {
+            width: 60%;
+            margin: auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2.5px solid red;
+            border-radius: 10px;
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 5px;
+            text-align: center;
+            color: goldenrod;
+            text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: calc(100% - 12px);
+            padding: 6px;
+            border: 2px solid red;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        input[type="submit"] {
+            background-color: red;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            text-align: center;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: rgb(204, 3, 53);
+        }
+
+        .result {
+            width: 61.5%;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2.5px solid red;
+            border-radius: 10px;
+            color: black;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+
+        li {
+            list-style-type: none;
+            margin-right: 40px;
+        }
+
+        ul {
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+        }
+    </style>
+</head>
+<body>
+    <h1>- Drug Consumption Prediction -</h1>
+    <form id="prediction-form">
+        {% for col in columns %}
+        <div class="form-group">
+            <label for="{{ col }}">{{ col }}</label>
+            <input type="number" step="any" name="{{ col }}" required>
+        </div>
+        {% endfor %}
+        <input type="submit" value="Jumlah Prediksi untuk Setiap Kelas oleh Estimators untuk Data Baru">
+    </form>
+    <div id="result" class="result"></div>
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Fetch response:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Prediction data:', data);
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <p>Prediksi Mayoritas: ${data.prediksi_majority_vote}</p>
+                    <p>Jumlah Prediksi untuk Setiap Kelas:</p>
+                    <ul>
+                        ${Object.entries(data.pred_result).map(([label, count]) => `<li>${label}: ${count}</li>`).join('')}
+                    </ul>
+                `;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
